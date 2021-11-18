@@ -1,31 +1,34 @@
 package com.itrex.java.lab.springboot;
 
-import com.itrex.java.lab.springboot.config.MyApplicationContextConfiguration;
 import com.itrex.java.lab.springboot.entity.User;
+import com.itrex.java.lab.springboot.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.itrex.java.lab.springboot.service.UserService;
-import org.h2.jdbcx.JdbcConnectionPool;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+@SpringBootApplication
+public class JDBCSpringBootProjectApplication implements CommandLineRunner {
 
-public class Runner {
+    @Autowired
+    ApplicationContext context;
 
     public static void main(String[] args) {
-        ApplicationContext ctx = new AnnotationConfigApplicationContext(MyApplicationContextConfiguration.class);
+        SpringApplication.run(JDBCSpringBootProjectApplication.class, args);
+    }
 
-        JdbcConnectionPool jdbcConnectionPool = ctx.getBean(JdbcConnectionPool.class);
-        UserService userService = ctx.getBean(UserService.class);
+    @Override
+    public void run(String... args) throws Exception {
+        UserService userService = context.getBean(UserService.class);
 
         System.out.println("===================START APP======================");
         workWithJDBC(userService);
-
-        System.out.println("=========CLOSE ALL UNUSED CONNECTIONS=============");
-        jdbcConnectionPool.dispose();
         System.out.println("=================SHUT DOWN APP====================");
     }
 

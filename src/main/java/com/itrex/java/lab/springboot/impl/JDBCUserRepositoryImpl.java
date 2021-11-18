@@ -2,7 +2,7 @@ package com.itrex.java.lab.springboot.impl;
 
 import com.itrex.java.lab.springboot.entity.User;
 import com.itrex.java.lab.springboot.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -15,8 +15,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 @Repository
-@RequiredArgsConstructor
-public class JDBCUserRepositoryImpl implements UserRepository {
+public class JDBCUserRepositoryImpl extends JdbcDaoSupport implements UserRepository {
 
     private static final String ID_COLUMN = "id";
     private static final String NAME_COLUMN = "name";
@@ -25,12 +24,14 @@ public class JDBCUserRepositoryImpl implements UserRepository {
     private static final String SELECT_ALL_QUERY = "SELECT * FROM user";
     private static final String INSERT_USER_QUERY = "INSERT INTO user(name, email, date_of_birth) VALUES (?, ?, ?)";
 
-    private final DataSource dataSource;
+    public JDBCUserRepositoryImpl(DataSource datasource) {
+        this.setDataSource(datasource);
+    }
 
     @Override
     public List<User> selectAll() {
         List<User> users = new ArrayList<>();
-        try(Connection con = dataSource.getConnection(); Statement stm = con.createStatement();
+        try(Connection con = getDataSource().getConnection(); Statement stm = con.createStatement();
             ResultSet resultSet = stm.executeQuery(SELECT_ALL_QUERY)) {
             while (resultSet.next()) {
                 User user = new User();
@@ -50,7 +51,7 @@ public class JDBCUserRepositoryImpl implements UserRepository {
 
     @Override
     public void add(User user) {
-        try (Connection con = dataSource.getConnection()) {
+        try (Connection con = getDataSource().getConnection()) {
             insertUser(user, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -59,7 +60,7 @@ public class JDBCUserRepositoryImpl implements UserRepository {
 
     @Override
     public void addAll(List<User> users) {
-        try (Connection con = dataSource.getConnection()) {
+        try (Connection con = getDataSource().getConnection()) {
             con.setAutoCommit(false);
             try {
                 for (User user : users) {
